@@ -5,6 +5,7 @@ import requests
 import sys
 from PIL import Image
 from io import BytesIO
+import json
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -19,6 +20,23 @@ PATH_TO_BLOG = PATH_TO_BLOGREPO.parent
 PATH_TO_CONTENT = PATH_TO_BLOG/"content"
 PATH_TO_CONTENT.mkdir(exist_ok=True, parents=True)
 
+###Load Json
+def read_json_file(file_path):
+    with open(file_path, 'r') as file:
+        data = json.load(file)
+    return data
+
+def extract_values(json_data):
+    if "title" in json_data and "tags" in json_data and "summary" in json_data:
+        return {
+            "title": json_data["title"],
+            "tags": json_data["tags"],
+            "summary": json_data["summary"]
+        }
+    else:
+        print("Error: JSON file is missing one or more required fields.")
+        return None
+
 def update_blog(commit_msg = 'Updates blog'):
     repo = Repo(PATH_TO_BLOGREPO)
     repo.git.add(all=True)
@@ -30,6 +48,45 @@ def update_blog(commit_msg = 'Updates blog'):
 #    f.write("WOW WOW WOW***")
 #update_blog()
 
+#use this version - will create an article and a cover image (uses story template)
+def create_new_blogV2(title, content, image_url, tags):
+    #new article file
+    files = len(list(PATH_TO_CONTENT.glob('*.html')))
+    new_title = f"blogPost{files+1}.html"
+    path_to_new_content = PATH_TO_CONTENT/new_title
+    path_to_template = "{}/story_template.html".format(PATH_TO_CONTENT)
+
+
+    #new cover image
+    img_name = f"blogImg{files+1}.png"
+    save_image(image_url, file_name=f"{PATH_TO_CONTENT}/{img_name}")
+    #cover_image = Path(cover_image)
+    #shutil.copy(cover_image, PATH_TO_CONTENT)
+
+    #read the template
+    with open(path_to_template, 'r') as file:
+        html_content = file.read()
+    #new_html = createBlogHtmlV2(f"content/{img_name}", title, tags, content)
+    html_content.replace("ArticleTitle", title)
+    html_content.replace("ArticleTage", tags)
+    html_content.replace("ArticleContent", content)
+    
+    print(html_content)
+
+    #write cover page
+    with open(path_to_template, 'w') as f:
+        f.write(html_content)
+
+    #write new blog
+    if not os.path.exists(path_to_new_content):
+        with open(path_to_new_content,"w") as f:
+            f.write(html_content)
+            return path_to_new_content
+    else:
+        raise FileExistsError('file already exists')
+
+
+#original DONT USE create_new_blog -- needs some love n fixin (use v2)
 def create_new_blog(title, content, cover_image):
     cover_image = Path(cover_image)
     files = len(list(PATH_TO_CONTENT.glob('*.html')))
@@ -58,21 +115,31 @@ def create_new_blog(title, content, cover_image):
     else:
         raise FileExistsError('file already exists')
 
+#Original version - not useful. Use V2
 def createBlogHtml(img_name, title, tags, story_link):
     htmlStr = f"<img src='{img_name}' alt='Cover Image' class='img-fluid'>\n"
-    htmlStr = htmlStr + f"<h2>{title}</h2>\n"
-    htmlStr = htmlStr + f"<p>{tags}</p>\n"
+    htmlStr = htmlStr + f"<h3>{title}</h3>\n"
+    htmlStr = htmlStr + f"<p style='color: grey;'>{tags}</p>\n"
     htmlStr = htmlStr + f"<a href='{story_link}' class='btn btn-primary'>Read more</a>\n"
     return htmlStr
 
+#USE THIS Version
+def createBlogHtmlV2(img_name, title, tags):
+    htmlStr = f"<img src='{img_name}' alt='Cover Image' class='img-fluid'>\n"
+    htmlStr = htmlStr + f"<h3>{title}</h3>\n"
+    htmlStr = htmlStr + f"<p style='color: grey;'>{tags}</p>\n"
+    htmlStr = htmlStr + f"<a href='{story_link}' class='btn btn-primary'>Read more</a>\n"
+    return htmlStr
+
+#DONT USE create_new_Bootsblog -- needs some love n fixin (use create_new_Blogv2)
 def create_new_bootsBlog(title, content, cover_image, storyCode):
-    cover_image = Path(cover_image)
+    cover_image_path = Path(cover_image)
     path_to_template = "{}/bootsBlog_template.html".format(PATH_TO_CONTENT)
     files = len(list(PATH_TO_CONTENT.glob('*.html')))
     new_title = f"{files+1}.html"
     path_to_new_content = PATH_TO_CONTENT/new_title
 
-    shutil.copy(cover_image, PATH_TO_CONTENT)
+    shutil.copy(cover_image_path, PATH_TO_CONTENT)
 
     #read the template
     with open(path_to_template, 'r') as file:
@@ -149,7 +216,7 @@ def create_prompt(title, topic):
 
 
 def dalle2_prompt(title):
-    prompt = f"Abstract anime image of {title}"
+    prompt = f"Geometric Pattern design art of {title}"
     return prompt
 
 def save_image(image_url, file_name):
@@ -173,16 +240,14 @@ def save_image(image_url, file_name):
 
 
 #Gen Blog
-if len(sys.argv) != 2:
-    print("Usage: python blogger.py <topic> <|> you passed in: ", sys.argv)
+if len(sys.argv) != 3:
+    print("Usage: python3 blogger.py <title> <tags> {|} you passed in: ", sys.argv)
     sys.exit(1)
 
 # Access the command-line arguments
-topic = sys.argv[1]
-if topic == "init":
-    title = "Rayze Daily Peek - Technology Strategy, Engineering and AI"
-else:
-    title = "Practical Engineering with {}".format(topic)
+title = sys.argv[1]
+tags = sys.argv[2]
+
 response = openai.Completion.create(
     model = "text-davinci-003",
     prompt = create_prompt(title, topic),
@@ -200,17 +265,9 @@ image_url = response['data'][0]['url']
 print(image_url)
 
 ##Create Blog and update web page
-#path_to_new_content = create_new_blog(title, blog_content, 'titlex.png')
-save_image(image_url, file_name=f"BLOGPOST1.png")
-path_to_new_content = create_new_bootsBlog(title, blog_content, 'BLOGPOST1.png', 'BLOGPOST1')
+#path_to_new_content = create_new_blog(title, blog_content, 'titlex.png') ##NOT USED
+#path_to_new_content = create_new_bootsBlog(title, blog_content, image_url, 'BLOGPOST1') ###NOT USED
+path_to_new_content = create_new_blogV2(title, blog_content, image_url, tags)
 write_to_index(path_to_new_content)
 update_blog()
     
-
-
-####### HTML TEMPLATE
-                    # <img src="https://via.placeholder.com/300" alt="Blog Post Image" class="img-fluid">
-                    # <h2>Blog Post Title 1</h2>
-                    # <p>This is a sample blog post. It could contain some interesting content about a specific topic.
-                    # </p>
-                    # <a href="#" class="btn btn-primary">Read more</a>
