@@ -1,4 +1,4 @@
-[{"title": "How we solved scaling of services with Kubernetes",
-  "tags": "Microservices, Engineering, Cloud",
-  "summary": "You are a senior engineering developer consultant who successfully delivered this project. Write a blog on how kubernetes was introduced, how the services were migrated and how the platform benefited. Keep it punchy with examples and code. It should be 800-1500 words in length."
-}]
+{"heading": "Generate a blog post about how we solved scaling of services with Kubernetes. The blog should be written by a senior engineering developer consultant who successfully delivered the project. The focus should be on introducing Kubernetes, migrating services, and the benefits of the platform. Keep the content punchy with examples and code. The length should be between 800-1500 words.",
+"title": "How we solved scaling of services with Kubernetes",
+  "tags": "Microservices, Engineering, Cloud"
+}

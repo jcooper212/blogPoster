@@ -64,18 +64,20 @@ def create_new_blogV2(title, content, image_url, tags):
     #shutil.copy(cover_image, PATH_TO_CONTENT)
 
     #read the template
+    html_content=""
     with open(path_to_template, 'r') as file:
         html_content = file.read()
     #new_html = createBlogHtmlV2(f"content/{img_name}", title, tags, content)
-    html_content.replace("ArticleTitle", title)
-    html_content.replace("ArticleTage", tags)
-    html_content.replace("ArticleContent", content)
+    print(f">>> {title} // {tags} // {content} /////, html_content.find('ArticleTitle')")
+    html_content = html_content.replace("ArticleTitle", title)
+    html_content = html_content.replace("ArticleTags", tags)
+    html_content = html_content.replace("ArticleContent", content)
     
-    print(html_content)
+    print("html_content is ", html_content)
 
     #write cover page
-    with open(path_to_template, 'w') as f:
-        f.write(html_content)
+    # with open(path_to_template, 'w') as f:
+    #     f.write(html_content)
 
     #write new blog
     if not os.path.exists(path_to_new_content):
@@ -216,7 +218,7 @@ def create_prompt(title, topic):
 
 
 def dalle2_prompt(title):
-    prompt = f"Geometric Pattern design art of {title}"
+    prompt = f"Generative art with no words of {title}"
     return prompt
 
 def save_image(image_url, file_name):
@@ -240,17 +242,25 @@ def save_image(image_url, file_name):
 
 
 #Gen Blog
-if len(sys.argv) != 3:
-    print("Usage: python3 blogger.py <title> <tags> {|} you passed in: ", sys.argv)
+if len(sys.argv) != 2:
+    print("Usage: python3 blogger.py <json_file>  {|} you passed in: ", sys.argv)
     sys.exit(1)
 
-# Access the command-line arguments
-title = sys.argv[1]
-tags = sys.argv[2]
-
+# Read json input
+json_data = read_json_file(sys.argv[1])
+print(json_data)
+prompt_str = ""
+if "title" in json_data and "tags" in json_data and "heading" in json_data:
+    prompt_str = f"{json_data['heading']} "
+    prompt_str = prompt_str + f"Title: {json_data['title']}  "
+    prompt_str = prompt_str + f"Tags: {json_data['tags']}  "
+else:
+    print("Error: JSON file is missing one or more required fields.")
+    
+#Gen OpenAI copmpletion response
 response = openai.Completion.create(
     model = "text-davinci-003",
-    prompt = create_prompt(title, topic),
+    prompt = prompt_str,
     temperature = 0.7,
     max_tokens = 1000)
 
@@ -258,16 +268,13 @@ blog_content = response['choices'][0]['text']
 print(blog_content)
 
 #Gen Image
-image_prompt = dalle2_prompt(title)
+image_prompt = dalle2_prompt(json_data['title'])
 response = openai.Image.create(prompt=image_prompt,
 n=1, size="256x256")
 image_url = response['data'][0]['url']
 print(image_url)
 
-##Create Blog and update web page
-#path_to_new_content = create_new_blog(title, blog_content, 'titlex.png') ##NOT USED
-#path_to_new_content = create_new_bootsBlog(title, blog_content, image_url, 'BLOGPOST1') ###NOT USED
-path_to_new_content = create_new_blogV2(title, blog_content, image_url, tags)
-write_to_index(path_to_new_content)
+path_to_new_content = create_new_blogV2(json_data['title'], blog_content, image_url, json_data['tags'])
+#write_to_index(path_to_new_content)
 update_blog()
     
