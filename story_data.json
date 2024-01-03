@@ -1,0 +1,4 @@
+{"heading": "Generate a blog post in simple html (just the body section of html and only use h1, h2, p and br tags) about how we built a new cloud based big data solution based on Azure, Databricks, Airflow and Power BI for reporting and completed the migration from on-prem oracle to this new platform. The blog should be written by a senior engineering developer consultant who successfully delivered the project. The focus should be on the approach, plan, data migration, obstacles as well as the challenges of data pipelines and orchestration. Finally the benefits of the platform. Keep the content punchy with examples and code. The length should be between 3000-5000 words.",
+"title": "Building out a data platform on the cloud",
+  "tags": "Data Engineering, Big Data, Data computation"
+}

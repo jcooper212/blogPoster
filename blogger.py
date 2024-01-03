@@ -72,6 +72,11 @@ def create_new_blogV2(title, content, image_url, tags):
     html_content = html_content.replace("ArticleTitle", title)
     html_content = html_content.replace("ArticleTags", tags)
     html_content = html_content.replace("ArticleContent", content)
+    html_content = html_content.replace("By [Your Name], Senior Engineering Developer Consultant", " ")
+
+    
+
+
     
     print("html_content is ", html_content)
 
