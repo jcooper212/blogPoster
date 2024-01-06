@@ -223,7 +223,7 @@ def create_prompt(title, topic):
 
 
 def dalle2_prompt(title):
-    prompt = f"Generative art with no words of {title}"
+    prompt = f"Space exploration with {title}"
     return prompt
 
 def save_image(image_url, file_name):
