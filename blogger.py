@@ -53,6 +53,7 @@ def create_new_blogV2(title, content, image_url, tags):
     #new article file
     files = len(list(PATH_TO_CONTENT.glob('*.html')))
     new_title = f"blogPost{files+1}.html"
+    
     path_to_new_content = PATH_TO_CONTENT/new_title
     path_to_template = "{}/story_template.html".format(PATH_TO_CONTENT)
 
@@ -264,7 +265,8 @@ else:
     
 #Gen OpenAI copmpletion response
 response = openai.Completion.create(
-    model = "text-davinci-003",
+    #model = "text-davinci-003",
+    model = "gpt-3.5-turbo-instruct",
     prompt = prompt_str,
     temperature = 0.7,
     max_tokens = 1000)

@@ -1,0 +1,7 @@
+ Generate a blog post in simple html (just the body section of html and only use h1, h2, p and br tags) about how we solved scaling of services with Kubernetes. The blog should be written by a senior engineering developer consultant who successfully delivered the project. The focus should be on introducing the problem, what Kubernetes is , the steps and process required in migrating services, and the benefits of the platform. Keep the content with examples so a business user can understand.  Write in 3000-5000 words
+
+-->microservices blog ---> use this
+you are a programmer. your challenge is to break down a legacy application for a retailer that is a monolith java applciation. Please re-implement this on the cloud in microservices. Show me the boiler plate code and write a blog as to how you did it
+
+--> data question ->blog
+you are a programmer in python, spark, airflow, hdfs, hive. Your challenge is to implement a project from scratch where you need to ingest 12 feeds, and design a data model. There are complex dependencies between the feeds which you need to orchestrate. You then need to implement this on the cloud with an hdfs/spark platform. Show me the boiler plate code and write a blog as to how you did it
